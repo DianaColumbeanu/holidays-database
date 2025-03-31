@@ -1,0 +1,168 @@
+HOLIDAYS
+CREATE DATABASE 
+
+# Destinations Tables
+CREATE TABLE Destinations (
+    Destination_id SERIAL PRIMARY KEY,
+    Country VARCHAR(255) NOT NULL,
+    City VARCHAR(255) NOT NULL,
+    Relief_Terrain VARCHAR(255),
+    Climate VARCHAR(255),
+    Start_date DATE NOT NULL,
+    End_date DATE NOT NULL,
+    Budget DECIMAL(10,2) CHECK (Budget >= 0),
+    Transport_id INT,
+    CONSTRAINT fk_transport FOREIGN KEY (Transport_id) REFERENCES Transport(Transport_id) ON DELETE SET NULL);
+
+# Travelers Tables
+CREATE TABLE Travelers (
+    Traveler_id SERIAL PRIMARY KEY,
+    First_name VARCHAR(100) NOT NULL,
+    Last_name VARCHAR(100) NOT NULL,
+    Gender CHAR(1) CHECK (Gender IN ('M', 'F', 'O')),
+    Age INT CHECK (Age >= 0),
+    Home_address TEXT,
+    Profession VARCHAR(255),
+    Licence VARCHAR(50),
+    Phone VARCHAR(50) UNIQUE,
+    Email VARCHAR(100) UNIQUE,
+    Destination_id INT REFERENCES Destinations(Destination_id) ON DELETE CASCADE);
+
+# Trips Tables
+CREATE TABLE Trips (
+    Trips_id SERIAL PRIMARY KEY,
+    Trip_category VARCHAR(255) NOT NULL,
+    Destination_id INT REFERENCES Destinations(Destination_id) ON DELETE CASCADE,
+    Start_date DATE NOT NULL,
+    End_date DATE NOT NULL,
+    CHECK (End_date >= Start_date));
+
+# Accommodation Tables
+CREATE TABLE Accommodation (
+    Accommodation_id SERIAL PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    Address TEXT NOT NULL,
+    Type VARCHAR(100) NOT NULL,
+    Price_per_night DECIMAL(10,2) CHECK (Price_per_night >= 0),
+    Rating DECIMAL(3,2) CHECK (Rating BETWEEN 0 AND 5),
+    My_notes TEXT,
+    Breakfast BOOLEAN DEFAULT FALSE,
+    Parking BOOLEAN DEFAULT FALSE,
+    Days_of_stay INT CHECK (Days_of_stay > 0));
+
+# Activity_Categoriesfor nominalization Tables
+CREATE TABLE Activity_Categories (
+    Category_id SERIAL PRIMARY KEY,
+    Category_name VARCHAR(255) UNIQUE NOT NULL);
+
+# Activities Tables
+CREATE TABLE Activities (
+    Activity_id SERIAL PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    Category_id INT NOT NULL,
+    Price DECIMAL(10,2) CHECK (Price >= 0),
+    Duration INT CHECK (Duration > 0),
+    Destination_id INT REFERENCES Destinations(Destination_id) ON DELETE CASCADE,
+    CONSTRAINT fk_category FOREIGN KEY (Category_id) REFERENCES Activity_Categories(Category_id));
+
+# Transport Tables
+CREATE TABLE Transport (
+    Transport_id SERIAL PRIMARY KEY,
+    Mode VARCHAR(50) NOT NULL,
+    Company VARCHAR(255),
+    Ticket_price DECIMAL(10,2) CHECK (Ticket_price >= 0));
+
+# Restaurants Tables
+CREATE TABLE Restaurants (
+    Restaurant_id SERIAL PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    Location TEXT NOT NULL,
+    Rating DECIMAL(3,2) CHECK (Rating BETWEEN 0 AND 5));
+
+# Meals Tables
+CREATE TABLE Meals (
+    Meal_id SERIAL PRIMARY KEY,
+    Date DATE NOT NULL,
+    Meal_type VARCHAR(255) CHECK (Meal_type IN ('Breakfast', 'Lunch', 'Dinner', 'Snack')),
+    Price DECIMAL(10,2) CHECK (Price >= 0));
+
+# Meal_Entries for relationship between meals-restaurants-destinations Tables
+CREATE TABLE Meal_Entries (
+    Meal_entry_id SERIAL PRIMARY KEY,
+    Meal_id INT REFERENCES Meals(Meal_id) ON DELETE CASCADE,
+    Restaurant_id INT REFERENCES Restaurants(Restaurant_id) ON DELETE CASCADE,
+    Destination_id INT REFERENCES Destinations(Destination_id) ON DELETE CASCADE);
+
+ALTER TABLE Destinations ADD COLUMN Currency VARCHAR (10) NOT NULL DEFAULT 'EUR';
+
+ #INSERT into database
+
+INSERT INTO Transport (Mode, Company, Ticket_price) VALUES
+('Avion', 'TAROM', 1200),
+('Mașină', NULL, 800),
+('Avion', 'Ryanair', 600);
+
+INSERT INTO Destinations (Country, City, Relief_Terrain, Climate, Start_date, End_date, Budget, Transport_id) VALUES
+('Spania', 'Barcelona', 'Coastal', 'Mediterranean', '2024-06-09', '2024-06-13', 5955, 1),
+('Italia', 'Florenta', 'Hilly', 'Temperate', '2024-08-08', '2024-08-09', 1500.38, 2),
+('Italia', 'Como', 'Coastal', 'Mediterranean', '2024-08-10', '2024-08-10', 500, 2),
+('Italia', 'Portofino', 'Coastal', 'Mediterranean', '2024-08-11', '2024-08-11', 500, 2),
+('Monaco', 'Monaco', 'Coastal', 'Mediterranean', '2024-08-12', '2024-08-12', 700, 2),
+('Franta', 'Nice', 'Coastal', 'Mediterranean', '2024-08-13', '2024-08-13', 1800, 2);
+
+INSERT INTO Accommodation (Name, Address, Type, Price_per_night, Rating, My_notes, Breakfast, Parking, Days_of_stay) VALUES
+('Hotel Indigo Barcelona', 'Plaza Espana, Barcelona', 'Hotel', 245, 4.3, 'Clean, Silent Accomodation, Excellent food, Excellent location, Free wifi with good signal, Remarkable attitude of the staff', TRUE, TRUE, 4),
+('Hotel Florence', 'Idontknow, Florenta', 'Hotel', 243, 4.2, 'Nice room, Clean, Good food', TRUE, FALSE, 1),
+('Small houses in Nice', 'Idontknow, Nice', 'House', 312, 4.5, 'Nice place', False, TRUE, 1);
+
+
+INSERT INTO Restaurants (Name, Location, Rating) VALUES
+('Las Arenas de Barcelona', 'Barcelona, Spain', 4.6),
+('Trattoria Mario', 'Florenta, Italy', 4.7),
+('Pasta e Basta', 'Milano, Italy', 4.5),
+('Chez Pierre', 'Nice, France', 4.4);
+
+INSERT INTO Meals (Date, Meal_type, Price) VALUES
+('2024-06-11', 'Dinner', 100),
+('2024-06-12', 'Lunch', 75),
+('2024-08-11', 'Dinner', 180),
+('2024-08-09', 'Dinner', 220),
+('2024-08-10', 'Lunch', 190),
+('2024-08-10', 'Dinner', 250);
+
+INSERT INTO Meal_Entries (Meal_id, Restaurant_id, Destination_id) VALUES
+(1, 1, 1),
+(2, 1, 1),
+(3, 1, 1),
+(4, 2, 2),
+(5, 3, 3),
+(6, 4, 6);
+
+INSERT INTO Activity_Categories (Category_name) VALUES
+('Museum'), ('Beach'), ('Mall'), ('Culture'), ('Shopping');
+
+INSERT INTO Activities (Name, Category_id, Price, Duration, Destination_id) VALUES
+('Montjuic castle', 4, 50, 3, 1),
+('Barcelona Beach', 2, 0, 3, 1),
+('Walk through the city', 4, 0, 2, 2),
+('Monte Carlo Casino', 4, 0, 2, 5)
+
+INSERT INTO Travelers (First_name, Last_name, Gender, Age, Home_address, Profession, Licence, Phone, Email, Destination_id) 
+VALUES
+('Diana', 'Diesel', 'F', 26, 'București, România', 'Analyst', 'B', '0751xxxxxx', 'dianadiesel@gmail.com', 1),
+('Mihai', 'Spritz', 'M', 33, 'București, România', 'IT Engineer', 'B', '0742xxxxxx', 'mihaispritz@gmail.com', 1),
+('Radu', 'GCar', 'M', 31, 'Arges, România', 'Engineer', 'B', '0763xxxxxx', 'raduceva@gmail.com', 2),
+('Madalina', 'GCar', 'F', 28, 'Arges, România', 'HR Manager', 'B', '0774xxxxxx', 'madalinaG@gmail.com', 2),
+('Maria', 'MAria-Simbutz', 'F', 26, 'Bucuresti, România', 'QA Engineer', 'B', '0785xxxxxx', 'maria@gmail.com', NULL),
+('Dan', 'Simbutz', 'M', 36, 'Bucuresti, România', 'IT Engineer', 'B', '0796xxxxxx', 'dansimb@gmail.com', NULL),
+('Simina', 'Oreo', 'F', 27, 'Bucuresti, România', 'IT Engineer', 'B', '0707xxxxxx', 'siminaoo@gmail.com', NULL),
+('Florin', 'Oreo', 'M', 33, 'Bucuresti, România', 'IT Engineer', 'B', '0718xxxxxx', 'florinoo@gmail.com', NULL),
+('Costic', 'Mare', 'M', 40, 'Buzau, România', 'Ceva', 'B', '0729xxxxxx', 'costic@gmail.com', NULL),
+('Alina', 'Victora', 'F', 34, 'Bucuresti', 'Ceva Achizitii', 'B', '0733xxxxxx', 'alina@gmail.com', NULL),
+('Victor', 'Numivine', 'M', '36', 'Bucuresti, România', 'Engineer Tata de fete', NULL, '0744xxxxxx', 'victor@gmail.com', NULL),
+('Bianca', 'Pablo', 'F', 28, 'Bucuresti, România', 'Ceva', 'B', '0755xxxxxx', 'bianca@gmail.com', NULL),
+('Liviu', 'Pablo', 'M', 34, 'Bucuresti, România', 'Seller', 'B', '0766xxxxxx', 'liviu@gmail.com', NULL);
+
+
+UPDATE Destinations SET Currency = 'EUR' WHERE Country IN ('Spania', 'Italia', 'Monaco', 'Franta');
+UPDATE Destinations SET Currency = 'RON' WHERE Country = 'România';
