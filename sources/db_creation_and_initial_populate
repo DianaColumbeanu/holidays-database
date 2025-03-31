@@ -1,7 +1,7 @@
 HOLIDAYS
 CREATE DATABASE 
 
--- Tabelul Destinations
+# Destinations Tables
 CREATE TABLE Destinations (
     Destination_id SERIAL PRIMARY KEY,
     Country VARCHAR(255) NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE Destinations (
     Transport_id INT,
     CONSTRAINT fk_transport FOREIGN KEY (Transport_id) REFERENCES Transport(Transport_id) ON DELETE SET NULL);
 
--- Tabelul Travelers
+# Travelers Tables
 CREATE TABLE Travelers (
     Traveler_id SERIAL PRIMARY KEY,
     First_name VARCHAR(100) NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE Travelers (
     Email VARCHAR(100) UNIQUE,
     Destination_id INT REFERENCES Destinations(Destination_id) ON DELETE CASCADE);
 
--- Tabelul Trips
+# Trips Tables
 CREATE TABLE Trips (
     Trips_id SERIAL PRIMARY KEY,
     Trip_category VARCHAR(255) NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE Trips (
     End_date DATE NOT NULL,
     CHECK (End_date >= Start_date));
 
--- Tabelul Accommodation
+# Accommodation Tables
 CREATE TABLE Accommodation (
     Accommodation_id SERIAL PRIMARY KEY,
     Name VARCHAR(255) NOT NULL,
@@ -50,12 +50,12 @@ CREATE TABLE Accommodation (
     Parking BOOLEAN DEFAULT FALSE,
     Days_of_stay INT CHECK (Days_of_stay > 0));
 
--- Tabelul Activity_Categories pentru normalizare
+# Activity_Categoriesfor nominalization Tables
 CREATE TABLE Activity_Categories (
     Category_id SERIAL PRIMARY KEY,
     Category_name VARCHAR(255) UNIQUE NOT NULL);
 
--- Tabelul Activities
+# Activities Tables
 CREATE TABLE Activities (
     Activity_id SERIAL PRIMARY KEY,
     Name VARCHAR(255) NOT NULL,
@@ -65,28 +65,28 @@ CREATE TABLE Activities (
     Destination_id INT REFERENCES Destinations(Destination_id) ON DELETE CASCADE,
     CONSTRAINT fk_category FOREIGN KEY (Category_id) REFERENCES Activity_Categories(Category_id));
 
--- Tabelul Transport
+# Transport Tables
 CREATE TABLE Transport (
     Transport_id SERIAL PRIMARY KEY,
     Mode VARCHAR(50) NOT NULL,
     Company VARCHAR(255),
     Ticket_price DECIMAL(10,2) CHECK (Ticket_price >= 0));
 
--- Tabelul Restaurants
+# Restaurants Tables
 CREATE TABLE Restaurants (
     Restaurant_id SERIAL PRIMARY KEY,
     Name VARCHAR(255) NOT NULL,
     Location TEXT NOT NULL,
     Rating DECIMAL(3,2) CHECK (Rating BETWEEN 0 AND 5));
 
--- Tabelul Meals
+# Meals Tables
 CREATE TABLE Meals (
     Meal_id SERIAL PRIMARY KEY,
     Date DATE NOT NULL,
     Meal_type VARCHAR(255) CHECK (Meal_type IN ('Breakfast', 'Lunch', 'Dinner', 'Snack')),
     Price DECIMAL(10,2) CHECK (Price >= 0));
 
--- Tabelul Meal_Entries pentru relaționarea meselor cu restaurante și destinații
+# Meal_Entries for relationship between meals-restaurants-destinations Tables
 CREATE TABLE Meal_Entries (
     Meal_entry_id SERIAL PRIMARY KEY,
     Meal_id INT REFERENCES Meals(Meal_id) ON DELETE CASCADE,
@@ -95,7 +95,8 @@ CREATE TABLE Meal_Entries (
 
 ALTER TABLE Destinations ADD COLUMN Currency VARCHAR (10) NOT NULL DEFAULT 'EUR';
 
- INSERT into database
+ #INSERT into database
+
 INSERT INTO Transport (Mode, Company, Ticket_price) VALUES
 ('Avion', 'TAROM', 1200),
 ('Mașină', NULL, 800),
